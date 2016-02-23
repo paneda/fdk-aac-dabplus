@@ -68,6 +68,7 @@ extern "C" {
 #define STR(x) XSTR(x)
 
 #define MAXSEGLEN 8189 // Bytes (EN 301 234 v2.1.1, ch. 5.1.1)
+#define MAXSEGLEN_MIN 250 // Bytes (Seems resonable enough)
 #define MAXDLS 128 // chars
 #define MAXSLIDESIZE 51200 // Bytes (TS 101 499 v3.1.1, ch. 9.1.2)
 
@@ -210,7 +211,7 @@ class History {
 };
 
 
-int encodeFile(int output_fd, std::string& fname, int fidx, bool raw_slides);
+int encodeFile(int output_fd, std::string& fname, int fidx, bool raw_slides, int max_segment_length);
 
 uint8_vector_t createMotHeader(
         size_t blobsize,
@@ -696,6 +697,9 @@ void usage(char* name)
                     " -R, --raw-slides       Do not process slides. Integrity checks and resizing\n"
                     "                          slides is skipped. Use this if you know what you are doing !\n"
                     "                          It is useful only when -d is used\n"
+                    " -m, --max-seg-len      Sets the maximum segment length.\n"
+                    "                          Possible values " STR(MAXSEGLEN_MIN) "-" STR(MAXSEGLEN) "\n"
+                    "                          Default value: " STR(MAXSEGLEN) "\n"
                     " -v, --verbose          Print more information to the console\n"
            );
 }
@@ -715,6 +719,7 @@ int main(int argc, char *argv[])
     int  charset = CHARSET_UTF8;
     bool raw_dls = false;
     bool remove_dls = false;
+    int max_segment_length = MAXSEGLEN;
 
     const char* dir = NULL;
     const char* output = "/tmp/pad.fifo";
@@ -731,6 +736,7 @@ int main(int argc, char *argv[])
         {"pad",        required_argument,  0, 'p'},
         {"sleep",      required_argument,  0, 's'},
         {"raw-slides", no_argument,        0, 'R'},
+        {"max-seg-len",required_argument,  0, 'm'},
         {"help",       no_argument,        0, 'h'},
         {"verbose",    no_argument,        0, 'v'},
         {0,0,0,0},
@@ -739,7 +745,7 @@ int main(int argc, char *argv[])
     int ch=0;
     int index;
     while(ch != -1) {
-        ch = getopt_long(argc, argv, "eChRrc:d:o:p:s:t:v", longopts, &index);
+        ch = getopt_long(argc, argv, "eChRrc:d:o:p:s:m:t:v", longopts, &index);
         switch (ch) {
             case 'c':
                 charset = atoi(optarg);
@@ -771,6 +777,9 @@ int main(int argc, char *argv[])
             case 'R':
                 raw_slides = true;
                 break;
+            case 'm':
+                max_segment_length = atoi(optarg);
+                break;
             case 'v':
                 verbose++;
                 break;
@@ -785,6 +794,14 @@ int main(int argc, char *argv[])
         fprintf(stderr, "mot-encoder Error: pad length %d invalid: Possible values: "
                 ALLOWED_PADLEN "\n",
                 padlen);
+        return 2;
+    }
+
+    if (max_segment_length < MAXSEGLEN_MIN || max_segment_length > MAXSEGLEN) {
+      fprintf(stderr, "mot-encoder Error: max segment length %d invalid: Possible values:[%d, %d]\n", 
+                max_segment_length,
+                MAXSEGLEN_MIN,
+                MAXSEGLEN);
         return 2;
     }
 
@@ -915,7 +932,7 @@ int main(int argc, char *argv[])
                     it != slides_to_transmit.end();
                     ++it) {
 
-                ret = encodeFile(output_fd, it->filepath, it->fidx, raw_slides);
+                ret = encodeFile(output_fd, it->filepath, it->fidx, raw_slides, max_segment_length);
                 if (ret != 1) {
                     fprintf(stderr, "mot-encoder Error: cannot encode file '%s'\n", it->filepath.c_str());
                 }
@@ -1040,7 +1057,7 @@ size_t resizeImage(MagickWand* m_wand, unsigned char** blob, std::string& fname)
 }
 #endif
 
-int encodeFile(int output_fd, std::string& fname, int fidx, bool raw_slides)
+int encodeFile(int output_fd, std::string& fname, int fidx, bool raw_slides, int max_segment_length)
 {
     int ret = 0;
     int fd=0, nseg, lastseglen, i, last, curseglen;
@@ -1223,8 +1240,8 @@ int encodeFile(int output_fd, std::string& fname, int fidx, bool raw_slides)
     }
 
     if (blobsize) {
-        nseg = blobsize / MAXSEGLEN;
-        lastseglen = blobsize % MAXSEGLEN;
+        nseg = blobsize / max_segment_length;
+        lastseglen = blobsize % max_segment_length;
         if (lastseglen != 0) {
             nseg++;
         }
@@ -1240,13 +1257,13 @@ int encodeFile(int output_fd, std::string& fname, int fidx, bool raw_slides)
         pad_packetizer->queue.push_back(mscdg);
 
         for (i = 0; i < nseg; i++) {
-            curseg = blob + i * MAXSEGLEN;
+            curseg = blob + i * max_segment_length;
             if (i == nseg-1) {
                 curseglen = lastseglen;
                 last = 1;
             }
             else {
-                curseglen = MAXSEGLEN;
+                curseglen = max_segment_length;
                 last = 0;
             }
 
