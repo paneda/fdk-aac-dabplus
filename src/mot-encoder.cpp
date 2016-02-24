@@ -408,6 +408,7 @@ private:
     const size_t xpad_size_max;
     const bool short_xpad;
     const size_t max_cis;
+    const bool never_omit_cis;
 
     size_t xpad_size;
     uint8_t subfields[4*48];
@@ -437,7 +438,7 @@ private:
 public:
     std::deque<DATA_GROUP*> queue;
 
-    PADPacketizer(size_t pad_size);
+    PADPacketizer(size_t pad_size, bool never_omit_cis);
     ~PADPacketizer();
 
     pad_t* GetPAD();
@@ -449,10 +450,11 @@ public:
 
 const size_t PADPacketizer::subfield_lens[] = {4, 6, 8, 12, 16, 24, 32, 48};
 
-PADPacketizer::PADPacketizer(size_t pad_size) :
+PADPacketizer::PADPacketizer(size_t pad_size, bool never_omit_cis) :
     xpad_size_max(pad_size - FPAD_LEN),
     short_xpad(pad_size == SHORT_PAD),
     max_cis(short_xpad ? 1 : 4),
+    never_omit_cis(never_omit_cis),
     last_ci_type(-1)
 {
     ResetPAD();
@@ -561,6 +563,7 @@ bool PADPacketizer::AppendDG(DATA_GROUP* dg) {
      * 4bb. the amount of available DG bytes being at least as big as the size of the last X-PAD in case all CIs are used
      */
     if (
+            !never_omit_cis &&
             used_cis == 0 &&
             last_ci_type != -1 &&
             last_ci_type == dg->apptype_cont &&
@@ -700,6 +703,7 @@ void usage(char* name)
                     " -m, --max-seg-len      Sets the maximum segment length.\n"
                     "                          Possible values " STR(MAXSEGLEN_MIN) "-" STR(MAXSEGLEN) "\n"
                     "                          Default value: " STR(MAXSEGLEN) "\n"
+                    " -n, --no-omit-ci       Never omit CI's\n"
                     " -v, --verbose          Print more information to the console\n"
            );
 }
@@ -720,6 +724,7 @@ int main(int argc, char *argv[])
     bool raw_dls = false;
     bool remove_dls = false;
     int max_segment_length = MAXSEGLEN;
+    bool no_omit_ci = false;
 
     const char* dir = NULL;
     const char* output = "/tmp/pad.fifo";
@@ -737,6 +742,7 @@ int main(int argc, char *argv[])
         {"sleep",      required_argument,  0, 's'},
         {"raw-slides", no_argument,        0, 'R'},
         {"max-seg-len",required_argument,  0, 'm'},
+        {"no-omit-ci", no_argument,        0, 'n'},
         {"help",       no_argument,        0, 'h'},
         {"verbose",    no_argument,        0, 'v'},
         {0,0,0,0},
@@ -745,7 +751,7 @@ int main(int argc, char *argv[])
     int ch=0;
     int index;
     while(ch != -1) {
-        ch = getopt_long(argc, argv, "eChRrc:d:o:p:s:m:t:v", longopts, &index);
+        ch = getopt_long(argc, argv, "eChRrcn:d:o:p:s:m:t:v", longopts, &index);
         switch (ch) {
             case 'c':
                 charset = atoi(optarg);
@@ -779,6 +785,9 @@ int main(int argc, char *argv[])
                 break;
             case 'm':
                 max_segment_length = atoi(optarg);
+                break;
+            case 'n':
+                no_omit_ci = true;
                 break;
             case 'v':
                 verbose++;
@@ -883,7 +892,7 @@ int main(int argc, char *argv[])
     MagickWandGenesis();
 #endif
 
-    pad_packetizer = new PADPacketizer(padlen);
+    pad_packetizer = new PADPacketizer(padlen, no_omit_ci);
 
     std::list<slide_metadata_t> slides_to_transmit;
     History slides_history(MAXHISTORYLEN);
