@@ -1361,8 +1361,10 @@ AACENC_ERROR aacEncOpen(
     }
 
     { /* Get bitstream outputbuffer size */
+      UINT buffer_bytes_min = (hAacEncoder->nMaxSubFrames*hAacEncoder->nMaxAacChannels*6144)>>3;
+      buffer_bytes_min = fixMax(buffer_bytes_min, (UINT) (24 * 110));   // consider maximum DAB+ Superframe size
       UINT ld_M;
-      for (ld_M=1; (UINT)(1<<ld_M) < (hAacEncoder->nMaxSubFrames*hAacEncoder->nMaxAacChannels*6144)>>3; ld_M++) ;
+      for (ld_M=1; (UINT)(1<<ld_M) < buffer_bytes_min; ld_M++) ;
       hAacEncoder->outBufferInBytes = (1<<ld_M);  /* buffer has to be 2^n */
     }
     hAacEncoder->outBuffer = GetRam_bsOutbuffer();
