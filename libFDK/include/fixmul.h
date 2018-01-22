@@ -98,11 +98,17 @@ amm-info@iis.fraunhofer.de
 #if defined(__arm__)
 #include "arm/fixmul_arm.h"
 
+#elif defined(__aarch64__) || defined(__AARCH64EL__)
+#include "aarch64/fixmul_aarch64.h"
+
 #elif defined(__mips__)	/* cppp replaced: elif */
 #include "mips/fixmul_mips.h"
 
 #elif defined(__x86__)	/* cppp replaced: elif */
 #include "x86/fixmul_x86.h"
+
+#elif defined(__powerpc__)
+#include "ppc/fixmul_ppc.h"
 
 #endif /* all cores */
 

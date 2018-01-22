@@ -1,12 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = subdir-objects
 
-if IS_GIT_REPO
-GITVERSION_FLAGS = -DGITVERSION="\"`git describe --dirty`\""
-else
-GITVERSION_FLAGS =
-endif
-
 AM_CPPFLAGS = \
     -I$(top_srcdir)/libAACdec/include \
     -I$(top_srcdir)/libAACenc/include \
@@ -18,6 +12,7 @@ AM_CPPFLAGS = \
     -I$(top_srcdir)/libFDK/include \
     -I$(top_srcdir)/libPCMutils/include
 
+AM_CXXFLAGS = -fno-exceptions -fno-rtti
 libfdk_aac_la_LINK = $(LINK) $(libfdk_aac_la_LDFLAGS)
 # Mention a dummy pure C file to trigger generation of the $(LINK) variable
 nodist_EXTRA_libfdk_aac_la_SOURCES = dummy.c
@@ -31,62 +26,21 @@ fdk_aacinclude_HEADERS = \
     $(top_srcdir)/libAACdec/include/aacdecoder_lib.h
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = fdk-aac-dabplus.pc
+pkgconfig_DATA = fdk-aac.pc
 
 lib_LTLIBRARIES = libfdk-aac.la
 
-libfdk_aac_la_CXXFLAGS = -fno-exceptions -fno-rtti -Wno-narrowing
 libfdk_aac_la_LDFLAGS = -version-info @FDK_AAC_VERSION@ -no-undefined \
     -export-symbols $(top_srcdir)/fdk-aac.sym
 
-#aac_enc_LDADD   = libfdk-aac.la
-#aac_enc_SOURCES = src/aac-enc.c \
-#				  src/wavreader.c
+if EXAMPLE
+bin_PROGRAMS = aac-enc$(EXEEXT)
 
-if HAVE_JACK
-dabplus_enc_LDADD_JACK  = -ljack
-else
-dabplus_enc_LDADD_JACK  =
+aac_enc_LDADD = libfdk-aac.la
+aac_enc_SOURCES = aac-enc.c wavreader.c
+
+noinst_HEADERS = wavreader.h
 endif
-
-
-dabplus_enc_LDFLAGS     = -no-install
-dabplus_enc_LDADD       = libfdk-aac.la -lfec -lzmq -lasound \
-						  -lrt $(dabplus_enc_LDADD_JACK) \
-						  $(LIBVLC_LIBS)
-dabplus_enc_CPPFLAGS    = $(AM_CPPFLAGS) $(GITVERSION_FLAGS) -ggdb -O2
-dabplus_enc_SOURCES     = src/dabplus-enc.cpp \
-						  src/FileInput.cpp \
-						  src/FileInput.h \
-						  src/AlsaInput.cpp \
-						  src/AlsaInput.h \
-						  src/JackInput.cpp \
-						  src/JackInput.h \
-						  src/VLCInput.cpp \
-						  src/VLCInput.h \
-						  src/SampleQueue.h \
-						  src/encryption.c \
-						  src/encryption.h \
-						  src/zmq.hpp \
-						  src/utils.c \
-						  src/utils.h \
-						  src/wavreader.c \
-						  src/charset.h \
-						  src/utf8.h \
-						  src/utf8/checked.h \
-						  src/utf8/unchecked.h \
-						  src/utf8/core.h
-
-mot_encoder_CXXFLAGS = $(GITVERSION_FLAGS) @MAGICKWAND_CFLAGS@ -Icontrib
-mot_encoder_LDADD    = @MAGICKWAND_LDADD@
-mot_encoder_SOURCES  = src/mot-encoder.cpp \
-					   contrib/lib_crc.h \
-					   contrib/lib_crc.c
-
-bin_PROGRAMS =  dabplus-enc$(EXEEXT) \
-				mot-encoder$(EXEEXT)
-
-noinst_HEADERS = src/wavreader.h
 
 AACDEC_SRC = \
     libAACdec/src/aacdec_drc.cpp \
@@ -120,7 +74,6 @@ AACENC_SRC = \
     libAACenc/src/pre_echo_control.cpp \
     libAACenc/src/quantize.cpp \
     libAACenc/src/tonality.cpp \
-    libAACenc/src/aacenc_hcr.cpp \
     libAACenc/src/aacEnc_rom.cpp \
     libAACenc/src/bandwidth.cpp \
     libAACenc/src/channel_map.cpp \
@@ -165,6 +118,7 @@ MPEGTPDEC_SRC = \
     libMpegTPDec/src/tpdec_adif.cpp \
     libMpegTPDec/src/tpdec_adts.cpp \
     libMpegTPDec/src/tpdec_asc.cpp \
+    libMpegTPDec/src/tpdec_drm.cpp \
     libMpegTPDec/src/tpdec_latm.cpp \
     libMpegTPDec/src/tpdec_lib.cpp
 
@@ -172,11 +126,12 @@ MPEGTPENC_SRC = \
     libMpegTPEnc/src/tpenc_adif.cpp \
     libMpegTPEnc/src/tpenc_adts.cpp \
     libMpegTPEnc/src/tpenc_asc.cpp \
-    libMpegTPEnc/src/tpenc_dab.cpp \
     libMpegTPEnc/src/tpenc_latm.cpp \
-    libMpegTPEnc/src/tpenc_lib.cpp
+    libMpegTPEnc/src/tpenc_lib.cpp \
+    libMpegTPEnc/src/tpenc_dab.cpp
 
 PCMUTILS_SRC = \
+    libPCMutils/src/limiter.cpp \
     libPCMutils/src/pcmutils_lib.cpp
 
 SBRDEC_SRC = \
@@ -231,11 +186,12 @@ libfdk_aac_la_SOURCES = \
     $(PCMUTILS_SRC) $(FDK_SRC) $(SYS_SRC)
 
 EXTRA_DIST = \
-    $(top_srcdir)/bootstrap \
+    $(top_srcdir)/autogen.sh \
+    $(top_srcdir)/MODULE_LICENSE_FRAUNHOFER \
     $(top_srcdir)/NOTICE \
-    $(top_srcdir)/README.md \
     $(top_srcdir)/Android.mk \
     $(top_srcdir)/fdk-aac.sym \
+    $(top_srcdir)/Makefile.vc \
     $(top_srcdir)/documentation/*.pdf \
     $(top_srcdir)/libAACdec/src/*.h \
     $(top_srcdir)/libAACdec/src/arm/*.cpp \
@@ -256,9 +212,12 @@ EXTRA_DIST = \
     $(top_srcdir)/libMpegTPDec/src/*.h \
     $(top_srcdir)/libMpegTPDec/src/version \
     $(top_srcdir)/libFDK/include/*.h \
+    $(top_srcdir)/libFDK/include/aarch64/*.h \
     $(top_srcdir)/libFDK/include/arm/*.h \
     $(top_srcdir)/libFDK/include/mips/*.h \
+    $(top_srcdir)/libFDK/include/ppc/*.h \
     $(top_srcdir)/libFDK/include/x86/*.h \
     $(top_srcdir)/libFDK/src/arm/*.cpp \
-    $(top_srcdir)/libFDK/src/mips/*.cpp
+    $(top_srcdir)/libFDK/src/mips/*.cpp \
+    $(top_srcdir)/win32/*.h
 

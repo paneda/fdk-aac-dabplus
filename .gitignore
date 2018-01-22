@@ -28,6 +28,7 @@ missing
 stamp-h1
 mot-encoder
 dabplus-enc-file
+compile
 dabplus-enc-file-zmq
 dabplus-enc-alsa-zmq
 dabplus-enc-zmq

@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -167,6 +167,36 @@ const SCHAR ExponentTable [4][14] =
 } ;
 
 
+/* 41 scfbands */
+static const SHORT sfb_96_1024[42] =
+{
+     0,    4,    8,   12,   16,   20,   24,   28,   32,   36,   40,   44,
+    48,   52,   56,   64,   72,   80,   88,   96,  108,  120,  132,  144,
+   156,  172,  188,  212,  240,  276,  320,  384,  448,  512,  576,  640,
+   704,  768,  832,  896,  960, 1024
+};
+/* 12 scfbands */
+static const SHORT sfb_96_128[13] =
+{
+     0,    4,    8,   12,   16,   20,   24,   32,   40,   48,    64,  92,
+   128
+};
+
+/* 47 scfbands*/
+static const SHORT sfb_64_1024[48] =
+{
+     0,   4,   8,  12,  16,  20,  24,   28,  32,  36,  40,  44,  48,  52,
+    56,  64,  72,  80,  88, 100, 112,  124, 140, 156, 172, 192, 216, 240,
+   268, 304, 344, 384, 424, 464, 504,  544, 584, 624, 664, 704, 744, 784,
+   824, 864, 904, 944, 984,1024
+};
+
+/* 12 scfbands */
+static const SHORT sfb_64_128[13] =
+{
+     0,   4,   8,  12,  16,  20,  24,
+    32,  40,  48,  64,  92, 128
+};
 
 /* 49 scfbands */
 static const SHORT sfb_48_1024[50] = {
@@ -239,6 +269,35 @@ static const SHORT sfb_8_128[16] =
 };
 
 
+static const SHORT sfb_96_960[42] =
+{
+  0,      4,      8,      12,     16,     20,     24,     28,     32,     36,
+  40,     44,     48,     52,     56,     64,     72,     80,     88,     96,
+  108,    120,    132,    144,    156,    172,    188,    212,    240,    276,
+  320,    384,    448,    512,    576,    640,    704,    768,    832,    896,
+  960
+};   /* 40 scfbands */
+
+static const SHORT sfb_96_120[13] =
+{
+  0,      4,      8,      12,     16,     20,     24,     32,     40,     48,
+  64,     92,     120
+};   /* 12 scfbands */
+
+static const SHORT sfb_64_960[47] =
+{
+  0,      4,      8,      12,     16,     20,     24,     28,     32,     36,
+  40,     44,     48,     52,     56,     64,     72,     80,     88,     100,
+  112,    124,    140,    156,    172,    192,    216,    240,    268,    304,
+  344,    384,    424,    464,    504,    544,    584,    624,    664,    704,
+  744,    784,    824,    864,    904,    944,    960
+};   /* 46 scfbands */
+
+static const SHORT sfb_64_120[13] =
+{
+  0,      4,      8,      12,     16,     20,     24,     32,     40,     48,
+  64,     92,     120
+};   /* 12 scfbands */
 
 static const SHORT sfb_48_960[50] =
 {
@@ -358,9 +417,9 @@ static const SHORT sfb_24_480[31] =
 const SFB_INFO sfbOffsetTables[5][16] =
 {
   {
-    { NULL, NULL, 0, 0 },
-    { NULL, NULL, 0, 0 },
-    { NULL, NULL, 0, 0 },
+    { sfb_96_1024, sfb_96_128, 41, 12 },
+    { sfb_96_1024, sfb_96_128, 41, 12 },
+    { sfb_64_1024, sfb_64_128, 47, 12 },
     { sfb_48_1024, sfb_48_128, 49, 14 },
     { sfb_48_1024, sfb_48_128, 49, 14 },
     { sfb_32_1024, sfb_48_128, 51, 14 },
@@ -372,9 +431,9 @@ const SFB_INFO sfbOffsetTables[5][16] =
     { sfb_8_1024, sfb_8_128, 40, 15 },
     { sfb_8_1024, sfb_8_128, 40, 15 },
   }, {
-    { NULL, NULL, 0, 0 },
-    { NULL, NULL, 0, 0 },
-    { NULL, NULL, 0, 0 },
+    { sfb_96_960, sfb_96_120, 40, 12 },
+    { sfb_96_960, sfb_96_120, 40, 12 },
+    { sfb_64_960, sfb_64_120, 46, 12 },
     { sfb_48_960, sfb_48_120, 49, 14 },
     { sfb_48_960, sfb_48_120, 49, 14 },
     { sfb_32_960, sfb_48_120, 49, 14 },
@@ -388,9 +447,9 @@ const SFB_INFO sfbOffsetTables[5][16] =
   }, {
     { NULL, NULL, 0, 0 },
   }, {
-    { NULL, NULL, 0, 0 },
-    { NULL, NULL, 0, 0 },
-    { NULL, NULL, 0, 0 },
+    { sfb_48_512,  NULL, 36, 0 },
+    { sfb_48_512,  NULL, 36, 0 },
+    { sfb_48_512,  NULL, 36, 0 },
     { sfb_48_512,  NULL, 36, 0 },
     { sfb_48_512, NULL, 36, 0},
     { sfb_32_512, NULL, 37, 0 },
@@ -402,9 +461,9 @@ const SFB_INFO sfbOffsetTables[5][16] =
     { sfb_24_512, NULL, 31, 0 },
     { sfb_24_512, NULL, 31, 0 },
   }, {
-    { NULL, NULL, 0, 0 },
-    { NULL, NULL, 0, 0 },
-    { NULL, NULL, 0, 0 },
+    { sfb_48_480, NULL, 35, 0 },
+    { sfb_48_480, NULL, 35, 0 },
+    { sfb_48_480, NULL, 35, 0 },
     { sfb_48_480, NULL, 35, 0 },
     { sfb_48_480, NULL, 35, 0 },
     { sfb_32_480, NULL, 37, 0 },
@@ -1777,42 +1836,62 @@ const FIXP_TCC FDKaacDec_tnsCoeff4 [16] =
 };
 
 /* MPEG like mapping (no change). */
-const UCHAR channelMappingTablePassthrough[8][8] =
+const UCHAR channelMappingTablePassthrough[15][8] =
 {
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  fallback  */
      { 0,  1,255,255,255,255,255,255},  /*  mono / PS */
      { 0,  1,255,255,255,255,255,255},  /*  stereo    */
      { 0,  1,  2,255,255,255,255,255},  /*  3ch       */
      { 0,  1,  2,  3,255,255,255,255},  /*  4ch       */
      { 0,  1,  2,  3,  4,255,255,255},  /*  5ch       */
      { 0,  1,  2,  3,  4,  5,255,255},  /*  5.1ch     */
-     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  7ch       */
-     { 0,  1,  2,  3,  4,  5,  6,  7}   /*  7.1ch     */
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  7.1 front */
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  reserved  */
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  reserved  */
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  reserved  */
+     { 0,  1,  2,  3,  4,  5,  6,255},  /*  6.1ch     */
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  7.1 rear  */
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  reserved  */
+     { 0,  1,  2,  3,  4,  5,  6,  7}   /*  7.1 top   */
 };
 
 /* WAV file like mapping (from MPEG mapping). */
-const UCHAR channelMappingTableWAV[8][8] =
+const UCHAR channelMappingTableWAV[15][8] =
 {
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  fallback  */
      { 0,  1,255,255,255,255,255,255},  /*  mono / PS */
      { 0,  1,255,255,255,255,255,255},  /*  stereo    */
      { 2,  0,  1,255,255,255,255,255},  /*  3ch       */
      { 2,  0,  1,  3,255,255,255,255},  /*  4ch       */
      { 2,  0,  1,  3,  4,255,255,255},  /*  5ch       */
      { 2,  0,  1,  4,  5,  3,255,255},  /*  5.1ch     */
-     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  7ch       */
-     { 2,  0,  1,  6,  7,  4,  5,  3}   /*  7.1ch     */
+     { 2,  6,  7,  0,  1,  4,  5,  3},  /*  7.1 front */
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  reserved  */
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  reserved  */
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  reserved  */
+     { 2,  0,  1,  4,  5,  6,  3,255},  /*  6.1ch     */
+     { 2,  0,  1,  6,  7,  4,  5,  3},  /*  7.1 rear  */
+     { 0,  1,  2,  3,  4,  5,  6,  7},  /*  reserved  */
+     { 2,  0,  1,  4,  5,  3,  6,  7}   /*  7.1 top   */
 };
 
 /* Lookup tables for elements in ER bitstream */
-const MP4_ELEMENT_ID elementsTab[8][7] =
+const MP4_ELEMENT_ID elementsTab[15][7] =
 {
-  {ID_SCE, ID_EXT, ID_END, ID_NONE, ID_NONE,ID_NONE,ID_NONE }, /* 1 channel  */
-  {ID_CPE, ID_EXT, ID_END, ID_NONE, ID_NONE,ID_NONE,ID_NONE }  /* 2 channels */
-  ,
-  {ID_SCE, ID_CPE, ID_EXT, ID_END, ID_NONE,ID_NONE,ID_NONE }, /* 3 channels */
-  {ID_SCE, ID_CPE, ID_SCE, ID_EXT, ID_END, ID_NONE,ID_NONE }, /* 4 channels */
-  {ID_SCE, ID_CPE, ID_CPE, ID_EXT, ID_END, ID_NONE,ID_NONE }, /* 5 channels */
-  {ID_SCE, ID_CPE, ID_CPE, ID_LFE, ID_EXT, ID_END, ID_NONE }, /* 6 channels */
-  {ID_SCE, ID_CPE, ID_CPE, ID_CPE, ID_LFE, ID_EXT, ID_END}    /* 8 channels */
+ /*  1 */  { ID_SCE,  ID_EXT,  ID_END,  ID_NONE, ID_NONE, ID_NONE, ID_NONE }, /* 1 channel  */
+ /*  2 */  { ID_CPE,  ID_EXT,  ID_END,  ID_NONE, ID_NONE, ID_NONE, ID_NONE }  /* 2 channels */
+ /*  3 */ ,{ ID_SCE,  ID_CPE,  ID_EXT,  ID_END,  ID_NONE, ID_NONE, ID_NONE }, /* 3 channels */
+ /*  4 */  { ID_SCE,  ID_CPE,  ID_SCE,  ID_EXT,  ID_END,  ID_NONE, ID_NONE }, /* 4 channels */
+ /*  5 */  { ID_SCE,  ID_CPE,  ID_CPE,  ID_EXT,  ID_END,  ID_NONE, ID_NONE }, /* 5 channels */
+ /*  6 */  { ID_SCE,  ID_CPE,  ID_CPE,  ID_LFE,  ID_EXT,  ID_END,  ID_NONE }  /* 6 channels */
+ /*  7 */ ,{ ID_SCE,  ID_CPE,  ID_CPE,  ID_CPE,  ID_LFE,  ID_EXT,  ID_END  },  /* 8 channels */
+ /*  8 */  { ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE },  /* reserved   */
+ /*  9 */  { ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE },  /* reserved   */
+ /* 10 */  { ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE },  /* reserved   */
+ /* 11 */  { ID_SCE,  ID_CPE,  ID_CPE,  ID_SCE,  ID_LFE,  ID_EXT,  ID_END  },  /* 7 channels */
+ /* 12 */  { ID_SCE,  ID_CPE,  ID_CPE,  ID_CPE,  ID_LFE,  ID_EXT,  ID_END  },  /* 8 channels */
+ /* 13 */  { ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE, ID_NONE },  /* reserved   */
+ /* 14 */  { ID_SCE,  ID_CPE,  ID_CPE,  ID_LFE,  ID_CPE,  ID_EXT,  ID_END  }   /* 8 channels */
 };
 
 /*! Random sign bit used for concealment

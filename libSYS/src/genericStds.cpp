@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -92,17 +92,22 @@ amm-info@iis.fraunhofer.de
 
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "genericStds.h"
-
 #include <math.h>
+
+#include "genericStds.h"
 
 /* library info */
 #define SYS_LIB_VL0 1
 #define SYS_LIB_VL1 3
-#define SYS_LIB_VL2 4
+#define SYS_LIB_VL2 8
 #define SYS_LIB_TITLE "System Integration Library"
+#ifdef __ANDROID__
+#define SYS_LIB_BUILD_DATE ""
+#define SYS_LIB_BUILD_TIME ""
+#else
 #define SYS_LIB_BUILD_DATE __DATE__
 #define SYS_LIB_BUILD_TIME __TIME__
+#endif
 
   #include <stdlib.h>
   #include <stdio.h>
@@ -116,7 +121,7 @@ amm-info@iis.fraunhofer.de
 
 
 /* Include OS/System specific implementations. */
-#if defined(__linux__)	/* cppp replaced: elif */
+#if defined(__linux__) && !defined(__ANDROID__) /* cppp replaced: elif */
   #include "linux/genericStds_linux.cpp"
 #endif
 
